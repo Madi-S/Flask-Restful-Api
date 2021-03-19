@@ -1,14 +1,6 @@
-from functools import wraps
 from flask_restful import Resource, reqparse
 from flask import request, jsonify, abort
-from app import app
 
-from football_parser import FootballParser
-
-
-footbal_args_parser = reqparse.RequestParser()
-footbal_args_parser.add_argument(
-    'team_name', type=str, help='Specify the football team name as string', required=True)
 
 
 test_create_parser = reqparse.RequestParser()
@@ -27,11 +19,6 @@ test_update_parser.add_argument('name', type=str, help='Specify your name')
 test_update_parser.add_argument('age', type=int, help='Specify your age')
 test_update_parser.add_argument('location', type=str, help='Specify your location')
 test_update_parser.add_argument('gender', choices=['male', 'female'], help='Specify your gender')
-
-
-def abort_if_team_doesnt_exist(team_name):
-    if not FootballParser.team_exists(team_name):
-        abort(404, 'Sorry, but specified football team does not exist')
 
 
 class HelloWorld(Resource):
@@ -60,7 +47,6 @@ class Health(Resource):
 
 
 followers = {}
-
 
 
 class Test(Resource):
@@ -99,9 +85,7 @@ class Test(Resource):
         for key, value in args:            
             if value:
                 follower[key] = value
-        
-
-
+    
     # Deleting
     def delete(self, user_id):
         Test.abort_if_follower_doesnt_exist(user_id)
@@ -110,25 +94,3 @@ class Test(Resource):
         return {'deleted': True}, 204
 
 
-
-def require_api_key(api_method):
-    @wraps(api_method)
-    def check_api_key(*args, **kwargs):
-        # apikey = request.headers.get('ApiKey')
-        # if apikey and apikey == SECRET_KEY:
-        #     return api_method(*args, **kwargs)
-        # else:
-        #     abort(401)
-        print('!!! CHECKING API KEY')
-        return api_method(*args, **kwargs)
-
-    return check_api_key
-
-
-class Football(Resource):
-    def get(self, team_name):
-        args = footbal_args_parser.parse_args()
-        football_team = args.football_team
-
-        data = FootballParser.get_team_info(football_team)
-        return data
