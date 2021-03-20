@@ -6,14 +6,14 @@ f = Faker()
 
 
 
-def country():
+def fake_country():
     return Location(
         city=f.city(),
         country=f.country(),
         zipcode=f.zipcode(),
     )
 
-def user():
+def fake_user():
     return User(
         last_name=f.last_name(),
         first_name=f.first_name(),
@@ -21,11 +21,16 @@ def user():
         location_id=choice(locations).id,
 )
 
+def api_key():
+    return APIKey(
+
+    )
+
 def fill(n, func):
     objs = []
-    for i in range(n):
+    for i in range(1, n + 1):
         objs.append(func())
-        print(f'Object #{i} created')
+        print(f'Object #{i} created: {func.__name__}')
 
     db.session.add_all(objs)
     db.session.commit()
@@ -34,6 +39,8 @@ def fill(n, func):
     return True
 
 if __name__ == '__main__':
-    fill(100, country)
+    fill(100, fake_country)
     locations = Location.query.all()
-    fill(200, user)
+    fill(200, fake_user)
+
+    fill(100, api_key)
