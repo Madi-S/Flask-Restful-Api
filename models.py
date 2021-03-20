@@ -11,10 +11,10 @@ class Job(db.Model):
     id = db.Column(db.String(36), primary_key=True)
     is_completed = db.Column(db.Boolean, default=False)
 
-    key = db.Column(db.Integer, db.ForeignKey('api_user.key'))
+    api_user_key = db.Column(db.Integer, db.ForeignKey('api_user.api_user_key'))
 
     def __repr__(self):
-        return f'<Job obj #{self.id}: {self.name}, {self.description}>'
+        return f'<Job obj #{self.id}: API User Key: {self.api_user_key}>'
 
     def delete(self):
         db.session.delete(self)
@@ -22,8 +22,8 @@ class Job(db.Model):
         return True
 
     @staticmethod
-    def create(id, api_key):
-        j = Job(id=id, key=api_key)
+    def create(id, key):
+        j = Job(id=id, api_user_key=api_key)
         db.session.add(j)
         db.session.commit()
 
@@ -34,18 +34,10 @@ class APIUser(db.Model):
     api_calls_limit = db.Column(db.Integer, default=5, nullable=False)
     api_call_interval = db.Column(db.Interval, nullable=False, default=timedelta(hours=12))
     
-    key = db.Column(db.String, db.ForeignKey('api_key.key'), nullable=False)
+    api_user_key = db.Column(db.String(200), db.ForeignKey('api_key.key'), nullable=False)
 
     def __repr__(self):
-        return f'<APIUser obj #{self.id}: {self.key}, {self.api_calls}>'
-
-    # def launch_task(self, name, description, *args, **kwargs):
-    #     rq_job = current_app.task_queue.enqueue('app.tasks.' + name, self.id,
-    #                                             *args, **kwargs)
-    #     task = Task(id=rq_job.get_id(), name=name, description=description,
-    #                 user=self)
-    #     db.session.add(task)
-    #     return task
+        return f'<APIUser obj #{self.id}: Key: {self.api_user_key}, API Calls: {self.api_calls}/{self.api_calls_limit} per {self.api_call_interval}>'
 
     def flush_api_calls(self):
         self.api_calls = 0
@@ -58,16 +50,25 @@ class APIUser(db.Model):
         db.session.commit()
         return True
 
+    @staticmethod
+    def create(api_key):
+        try:
+            user = APIUser(api_user_key=api_key)
+            db.session.add(user)
+            db.session.commit()
+        except:
+            pass
+
 
 class APIKey(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    key = db.Column(db.Integer, unique=True, default=lambda: uuid4().hex)
+    key = db.Column(db.String(200), unique=True, nullable=False, default=lambda: uuid4().hex)
     is_valid = db.Column(db.Boolean, default=True)
     
     user = db.relationship('APIUser', backref='key_obj', uselist=False, lazy=True)
 
     def __repr__(self):
-        return f'<APIKey obj #{self.id}: {self.key}, {self.is_valid}>'
+        return f'<APIKey obj #{self.id}: Key: {self.key}, Valid: {self.is_valid}>'
 
 
 class User(db.Model):
