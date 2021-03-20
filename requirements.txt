@@ -1,0 +1,7 @@
+requests==2.24.0
+Faker==6.1.1
+redis==3.5.3
+Flask==1.1.2
+rq==1.7.0
+Flask_RESTful==0.3.8
+Flask_SQLAlchemy==2.4.4
