@@ -10,4 +10,5 @@ if __name__ == '__main__':
     api.add_resource(Faker, '/faker/<string:api_key>')
     app.run()
 
-    # $ rq worker
+    # Don't forget to run redis worker:
+    # rq worker --with-scheduler
