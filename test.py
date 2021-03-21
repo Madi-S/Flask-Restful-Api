@@ -25,5 +25,5 @@ BASE = 'http://127.0.0.1:5000/'
 # print(r.json())
 
 
-r = requests.get(BASE + '/faker/2b5f30c1e04840aaa8953ea2132f4feb')
+r = requests.get(BASE + '/faker/aacfe40e11094db9b5f7a7c855fba764')
 print(r)

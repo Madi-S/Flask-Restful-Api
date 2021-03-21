@@ -22,7 +22,7 @@ class Job(db.Model):
         return True
 
     @staticmethod
-    def create(id, key):
+    def create(id, api_key):
         j = Job(id=id, api_user_key=api_key)
         db.session.add(j)
         db.session.commit()
@@ -32,19 +32,18 @@ class APIUser(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     api_calls = db.Column(db.Integer, default=0, nullable=False) 
     api_calls_limit = db.Column(db.Integer, default=5, nullable=False)
-    api_call_interval = db.Column(db.Interval, nullable=False, default=timedelta(hours=12))
+    api_call_interval = db.Column(db.Interval, nullable=False, default=timedelta(seconds=100))
     
     api_user_key = db.Column(db.String(200), db.ForeignKey('api_key.key'), nullable=False)
 
     def __repr__(self):
-        return f'<APIUser obj #{self.id}: Key: {self.api_user_key}, API Calls: {self.api_calls}/{self.api_calls_limit} per {self.api_call_interval}>'
+        return f'<APIUser obj #{self.id}: Key: {self.api_user_key}, API Calls: {self.api_calls}/{self.api_calls_limit} per {self.api_call_interval.seconds} seconds>'
 
     def flush_api_calls(self):
         self.api_calls = 0
         db.session.commit()
         return True
 
-    @staticmethod
     def increment_api_calls_by_n(self, n=1):
         self.api_calls += n
         db.session.commit()
