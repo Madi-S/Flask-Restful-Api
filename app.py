@@ -3,7 +3,7 @@ from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
 from config import Configuration
 
-import redis
+from redis import Redis
 from rq import Queue
 
 
@@ -13,11 +13,7 @@ app.config.from_object(Configuration)
 api = Api(app)
 db = SQLAlchemy(app)
 
-r = redis.Redis()
-
-q = Queue('default', connection=r)
-# q = Queue(connection=r)
-print(dir(q))
+q = Queue(connection=Redis())
 '''
 'acquire_cleaning_lock', 'all', 'compact', 'connection', 'count', 'create_job', 
 'deferred_job_registry', 'delete', 'dequeue_any', 'empty', 'enqueue', 'enqueue_at', 
