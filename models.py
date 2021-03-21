@@ -39,15 +39,28 @@ class APIUser(db.Model):
     def __repr__(self):
         return f'<APIUser obj #{self.id}: Key: {self.api_user_key}, API Calls: {self.api_calls}/{self.api_calls_limit} per {self.api_call_interval.seconds} seconds>'
 
-    def flush_api_calls(self):
-        self.api_calls = 0
-        db.session.commit()
-        return True
 
     def increment_api_calls_by_n(self, n=1):
-        self.api_calls += n
-        db.session.commit()
-        return True
+        if self:
+            print('IN increment_api_calls_by_n')
+            print('BEFORE API_USER:', self)
+            self.api_calls += n
+            db.session.commit()
+            print('AFTER API_USER:', self)
+            return True
+
+    def flush_api_calls(self, key):
+        '''
+        Done in such terrible manner because rq worker raises ImportError, when working with staticmethod
+        '''
+        user = APIUser.query.filter_by(api_user_key=key).first()
+        if user:
+            print('IN flush_api_calls')
+            print('BEFORE API_USER:', user)
+            user.api_calls = 0
+            db.session.commit()
+            print('AFTER API_USER:', user)
+            return True
 
     @staticmethod
     def create(api_key):
