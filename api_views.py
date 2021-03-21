@@ -1,4 +1,4 @@
-from models import APIKey, APIUser, User, Location, Job
+import models 
 from flask_restful import Resource, reqparse
 from flask import request, jsonify, abort
 from app import app, q
@@ -15,12 +15,14 @@ def validate_api_key(api_method):
 
         api_key = kwargs.get('api_key', 'lololo')
 
-        api_key_obj = APIKey.query.filter_by(key=api_key).first()
+        api_key_obj = models.APIKey.query.filter_by(key=api_key).first()
 
         print('*** API KEY OBJ:', api_key_obj)
 
         if api_key_obj and api_key_obj.is_valid and api_key_obj.user:
+
             print('*** SUCCESSFUL API KEY VALIDATION')
+
             return api_method(*args, **kwargs)
         else:
             abort(401, 'Specify the valid API key. You can get by contacting me on GitHub')
@@ -35,10 +37,11 @@ def enqueue_api_calls_flush(api_method):
         print('*** IN enqueue_api_calls_flush')
 
         api_key = kwargs.get('api_key')
+        api_user = models.APIUser.query.filter_by(api_user_key=api_key).first()
 
         print('*** API_KEY:', api_key)
 
-        job_model = Job.query.filter_by(api_user_key=api_key).first()
+        job_model = models.Job.query.filter_by(api_user_key=api_key).first()
         if job_model:
             job_id = job_model.id
             rq_job = q.fetch_job(job_id)
@@ -55,16 +58,16 @@ def enqueue_api_calls_flush(api_method):
         if not (job_model and rq_job):             
             print('*** NO EXISTING JOB -> CREATING NEW JOB')
 
-            api_user = APIUser.query.filter_by(api_user_key=api_key).first()
+            print('*** GONNA FLUSH API_CALLS TO:', api_key)
             
             func = api_user.flush_api_calls
             # interval = api_user.api_call_interval
-            interval = timedelta(seconds=15)
+            interval = timedelta(seconds=10)
 
             print('*** INTERVAL IN SEC:', interval.seconds)
 
-            rq_job = q.enqueue_in(interval, func)
-            Job.create(rq_job.id, api_key)
+            rq_job = q.enqueue_in(interval, func, (api_key, ))
+            models.Job.create(rq_job.id, api_key)
 
         # Deleting Job on completion and creating a new one, if not completed yet -> rewriting it with a new rq job
         else:            
@@ -74,11 +77,11 @@ def enqueue_api_calls_flush(api_method):
             print('*** RQ JOB:', rq_job)
             print('*** JOB MODEL:', job_model)
 
-            print(rq_job.enqueued_at, rq_job.ttl)
+            print('*** ENQUEUED AT:',rq_job.enqueued_at)
 
             print('*** JOB STATUS:', rq_job.is_finished)
 
-            # Finished? Delete it, and grant user access to our APIs
+            # Finished? Delete it, and grant user access to our APIs and enqueue another job
             if rq_job.is_finished:
                 print('*** JOB IS FINISHED -> DELETING IT')
             
@@ -88,13 +91,17 @@ def enqueue_api_calls_flush(api_method):
                 # Delete as model object
                 job_model.delete()
 
+                # Enqueue new job
+                func = api_user.flush_api_calls
+                # interval = api_user.api_call_interval
+                interval = timedelta(seconds=10)
+
+                rq_job = q.enqueue_in(interval, func, (api_key,))
+                models.Job.create(rq_job.id, api_key)
+
             # Overwrite existing running job only if limit was not exceeded with in order to not refresh job every time locked api call was received 
             else:           
-                print('*** GONNA OVERWRITE EXISTING JOB ONLY IF API CALLS LIMIT WAS NOT EXCEED')
-                
-                api_user = APIUser.query.filter_by(api_user_key=api_key).first()
-
-                print('*** INTERVAL IN SEC:', api_user.api_call_interval.seconds)
+                print('*** GONNA OVERWRITE EXISTING JOB ONLY IF API CALLS LIMIT WAS NOT EXCEED')                
 
                 # As said above, canceling existing job if api calls limit is not exceeded
                 if api_user.api_calls < api_user.api_calls_limit:
@@ -111,8 +118,8 @@ def enqueue_api_calls_flush(api_method):
                     # interval = api_user.api_call_interval
                     interval = timedelta(seconds=10)
 
-                    rq_job = q.enqueue_in(interval, func)
-                    Job.create(rq_job.id, api_key)
+                    rq_job = q.enqueue_in(interval, func, (api_key, ))
+                    models.Job.create(rq_job.id, api_key)
 
                     print('*** OVERWRITTEN')
 
@@ -128,14 +135,19 @@ def check_api_calls_limit(api_method):
         print('*** IN check_api_calls_limit')
 
         api_key = kwargs.get('api_key', 'lololo')
-        api_user = APIUser.query.filter_by(api_user_key=api_key).first()
+        api_user = models.APIUser.query.filter_by(api_user_key=api_key).first()
+
+        print('*** API_USER:', api_user)
 
         if api_user.api_calls < api_user.api_calls_limit:
             api_user.increment_api_calls_by_n(n=1)
-            print('*** INCREMENTING API CALLS BY 1, CURRENT CALLS NUMBER:', api_user.api_calls)
-            return api_method(*args, **kwargs)
+        
+            print('*** INCREMENTING API CALLS')
+
+            return api_method(*args, **kwargs)        
         else:
             print('*** API CALLS LIMIT EXCEEDED')
+
             abort(401, f'You have exceeded your API calls limit per {api_user.api_call_interval.seconds} seconds')
 
     return inner
