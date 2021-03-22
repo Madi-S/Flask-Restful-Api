@@ -1,9 +1,9 @@
 import rq
 import redis
 
-from app import db, app
 from uuid import uuid4
 from datetime import timedelta
+from app import db, app, logger
 
 
 
@@ -55,7 +55,7 @@ class APIUser(db.Model):
         user = APIUser.query.filter_by(api_user_key=key).first()
         if user:
             logger.debug('IN flush_api_calls')
-            loggder.debug('BEFORE: API_USER %s', user)
+            logger.debug('BEFORE: API_USER %s', user)
 
             user.api_calls = 0
             db.session.commit()
