@@ -7,23 +7,21 @@ from datetime import timedelta
 
 
 
-class Job(db.Model):
-    id = db.Column(db.String(36), primary_key=True)
-    is_completed = db.Column(db.Boolean, default=False)
-
+class FlushAPICallsJob(db.Model):
+    job_id = db.Column(db.String(36), primary_key=True)
     api_user_key = db.Column(db.Integer, db.ForeignKey('api_user.api_user_key'))
 
     def __repr__(self):
-        return f'<Job obj #{self.id}: API User Key: {self.api_user_key}>'
+        return f'<FlushAPICallsTask obj #{self.id}: API User Key: {self.api_user_key}>'
 
     def delete(self):
         db.session.delete(self)
         db.session.commit()
         return True
 
-    @staticmethod
-    def create(id, api_key):
-        j = Job(id=id, api_user_key=api_key)
+    @classmethod
+    def create(cls, id, api_key):
+        j = cls(id=id, api_user_key=api_key)
         db.session.add(j)
         db.session.commit()
 
@@ -32,21 +30,22 @@ class APIUser(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     api_calls = db.Column(db.Integer, default=0, nullable=False) 
     api_calls_limit = db.Column(db.Integer, default=5, nullable=False)
-    api_call_interval = db.Column(db.Interval, nullable=False, default=timedelta(seconds=100))
+    api_call_interval = db.Column(db.Interval, nullable=False, default=timedelta(seconds=10))
     
     api_user_key = db.Column(db.String(200), db.ForeignKey('api_key.key'), nullable=False)
 
     def __repr__(self):
         return f'<APIUser obj #{self.id}: Key: {self.api_user_key}, API Calls: {self.api_calls}/{self.api_calls_limit} per {self.api_call_interval.seconds} seconds>'
 
-
-    def increment_api_calls_by_n(self, n=1):
+    def change_api_calls_by_n(self, n=1):
         if self:
-            print('IN increment_api_calls_by_n')
-            print('BEFORE API_USER:', self)
+            logger.debug('IN increment_api_calls_by_n')
+            loggder.debug('BEFORE: API_USER %s', self)
+
             self.api_calls += n
             db.session.commit()
-            print('AFTER API_USER:', self)
+
+            logger.debug('AFTER: API_USER %s', self)
             return True
 
     def flush_api_calls(self, key):
@@ -55,11 +54,13 @@ class APIUser(db.Model):
         '''
         user = APIUser.query.filter_by(api_user_key=key).first()
         if user:
-            print('IN flush_api_calls')
-            print('BEFORE API_USER:', user)
+            logger.debug('IN flush_api_calls')
+            loggder.debug('BEFORE: API_USER %s', user)
+
             user.api_calls = 0
             db.session.commit()
-            print('AFTER API_USER:', user)
+
+            logger.debug('AFTER: API_USER %s', user)
             return True
 
     @staticmethod
@@ -83,18 +84,18 @@ class APIKey(db.Model):
         return f'<APIKey obj #{self.id}: Key: {self.key}, Valid: {self.is_valid}>'
 
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(100), nullable=False)
-    last_name = db.Column(db.String(100), nullable=False)
+class FakeUser(db.Model):
     middle_name = db.Column(db.String(100))
+    id = db.Column(db.Integer, primary_key=True)
+    last_name = db.Column(db.String(100), nullable=False)
+    first_name = db.Column(db.String(100), nullable=False)
 
-    location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=False)
+    location_id = db.Column(db.Integer, db.ForeignKey('fake_location.id'), nullable=False)
 
     def __repr__(self):
-        return f'<User obj #{self.id}: {self.first_name} {self.last_name} {self.last_name}>'
+        return f'<FakeUser obj #{self.id}: {self.first_name} {self.last_name} {self.last_name}>'
 
-    def jsonified_obj(self):
+    def jsonified(self):
         return {
             'id': self.id,
             'first_name': self.first_name,
@@ -109,18 +110,18 @@ class User(db.Model):
         }
 
 
-class Location(db.Model):
+class FakeLocation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    country = db.Column(db.String(200), nullable=False)
     city = db.Column(db.String(200), nullable=False)
     zipcode = db.Column(db.String(20), nullable=False)
+    country = db.Column(db.String(200), nullable=False)
 
-    citizens = db.relationship('User', backref='person', lazy=True)
+    citizens = db.relationship('FakeUser', backref='person', lazy=True)
 
     def __repr__(self):
-        return f'<Location object #{self.id}: country: {self.country}, city: {self.city}>'
+        return f'<FakeLocation object #{self.id}: country: {self.country}, city: {self.city}>'
 
-    def jsonified_obj(self):
+    def jsonified(self):
         data =  {
             'id': self.id,
             'city': self.city,
