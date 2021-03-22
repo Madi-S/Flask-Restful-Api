@@ -57,7 +57,7 @@ def enqueue_api_calls_flush(api_method):
         
         if job_model:
             logger.debug('JOB MODEL EXISTS %s', job_model)
-            job_id = job_model.id
+            job_id = job_model.job_id
             rq_job = q.fetch_job(job_id)
             logger.debug('REDIS QUEUE JOB %s', rq_job)
         else:
@@ -126,12 +126,12 @@ class Faker(Resource):
         # args = 
         # TODO: if args req parser has hrown an error, decrement api calls by 1
         logger.debug('FAKER: IN GET')
-        fake_user = Faker.query.get(1)
+        fake_user = FakeUser.query.get(1)
         return fake_user.jsonified()
 
     @validate_api_key
     @check_api_calls_limit
     def post(self, api_key):
         logger.debug('FAKER: IN POST')
-        fake_user = Faker.query.get(1)
+        fake_user = FakeUser.query.get(1)
         return fake_user.jsonified()
