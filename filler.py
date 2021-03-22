@@ -6,15 +6,15 @@ f = Faker()
 
 
 
-def fake_country():
-    return Location(
+def fake_location():
+    return FakeLocation(
         city=f.city(),
         country=f.country(),
         zipcode=f.zipcode(),
     )
 
 def fake_user():
-    return User(
+    return FakeUser(
         last_name=f.last_name(),
         first_name=f.first_name(),
         middle_name=f.last_name(),
@@ -39,8 +39,8 @@ def fill(n, func):
     return True
 
 if __name__ == '__main__':
-    fill(100, fake_country)
-    locations = Location.query.all()
+    fill(100, fake_location)
+    locations = FakeLocation.query.all()
     fill(200, fake_user)
 
     fill(100, api_key)
