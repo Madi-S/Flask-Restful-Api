@@ -12,7 +12,7 @@ class FlushAPICallsJob(db.Model):
     api_user_key = db.Column(db.Integer, db.ForeignKey('api_user.api_user_key'))
 
     def __repr__(self):
-        return f'<FlushAPICallsTask obj #{self.id}: API User Key: {self.api_user_key}>'
+        return f'<FlushAPICallsTask obj #{self.job_id}: API User Key: {self.api_user_key}>'
 
     def delete(self):
         db.session.delete(self)
@@ -21,7 +21,7 @@ class FlushAPICallsJob(db.Model):
 
     @classmethod
     def create(cls, id, api_key):
-        j = cls(id=id, api_user_key=api_key)
+        j = cls(job_id=id, api_user_key=api_key)
         db.session.add(j)
         db.session.commit()
 
@@ -40,7 +40,7 @@ class APIUser(db.Model):
     def change_api_calls_by_n(self, n=1):
         if self:
             logger.debug('IN increment_api_calls_by_n')
-            loggder.debug('BEFORE: API_USER %s', self)
+            logger.debug('BEFORE: API_USER %s', self)
 
             self.api_calls += n
             db.session.commit()
@@ -116,7 +116,7 @@ class FakeLocation(db.Model):
     zipcode = db.Column(db.String(20), nullable=False)
     country = db.Column(db.String(200), nullable=False)
 
-    citizens = db.relationship('FakeUser', backref='person', lazy=True)
+    citizens = db.relationship('FakeUser', backref='location', lazy=True)
 
     def __repr__(self):
         return f'<FakeLocation object #{self.id}: country: {self.country}, city: {self.city}>'
