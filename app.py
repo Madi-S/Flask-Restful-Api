@@ -1,3 +1,5 @@
+import logging
+
 from flask import Flask
 from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
@@ -7,13 +9,23 @@ from redis import Redis
 from rq import Queue
 
 
+logger = logging.getLogger('API')
+
+handler = logging.StreamHandler()
+handler.setLevel(logging.DEBUG)
+
+logger.setLevel(logging.DEBUG)
+logger.addHandler(handler)
+
 app = Flask(__name__)
 app.config.from_object(Configuration)
+logger.debug('Flask app instantiated %s', app)
 
 api = Api(app)
 db = SQLAlchemy(app)
 
 q = Queue(connection=Redis())
+
 '''
 'acquire_cleaning_lock', 'all', 'compact', 'connection', 'count', 'create_job', 
 'deferred_job_registry', 'delete', 'dequeue_any', 'empty', 'enqueue', 'enqueue_at', 
