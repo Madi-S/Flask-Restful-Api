@@ -1,13 +1,15 @@
-from app import app, api
 from api_views import Faker
+from app import app, api, logger
 from views import HelloWorld, Health, Test
 
 
 if __name__ == '__main__':
+    logger.debug('ADDING RESOURCES')
     api.add_resource(HelloWorld, '/hello')
-    api.add_resource(Health, '/health/<int:age>/<int:weight>')
     api.add_resource(Test, '/test/<int:user_id>')
     api.add_resource(Faker, '/faker/<string:api_key>')
+    api.add_resource(Health, '/health/<int:age>/<int:weight>')
+    logger.debug('RESOURCES ADDED -> APP IS RUNNING')
     app.run()
 
     # Don't forget to run redis worker:
