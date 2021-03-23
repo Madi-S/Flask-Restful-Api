@@ -22,15 +22,7 @@ def fake_user(i):
     )
 
 
-def api_user(i):
-    return APIUser(api_user_key=keys[i].key)
-
-
-def api_key(i):
-    return APIKey()
-
-
-def fill(n, func):
+def fill_fake(n, func):
     objs = []
     for i in range(n):
         objs.append(func(i))
@@ -42,20 +34,28 @@ def fill(n, func):
     logger.debug('Commited')
     return True
 
+# --- REAL OBJECTS ---
+
+
+def fill_user(n):
+    for i in range(100):
+        password = '12345'  # f.password()
+        username = f.unique.user_name()
+        APIUser.create(username, password)
+        logger.debug('API User #%s created %s:%s', i+1, pwd, username)
+    logger.debug('%s API Users created', 100)
+
 
 if __name__ == '__main__':
-    db.drop_all()
-    db.session.commit()
-    logger.debug('DB TABLES DROPED')
+    # db.drop_all()
+    # db.session.commit()
+    # logger.debug('DB TABLES DROPED')
 
-    db.create_all()
-    db.session.commit()
-    logger.debug('DB TABLES CREATED')
+    # db.create_all()
+    # db.session.commit()
+    # logger.debug('DB TABLES CREATED')
 
-    fill(100, fake_location)
-    locations = FakeLocation.query.all()
-    fill(100, fake_user)
-
-    fill(100, api_key)
-    keys = APIKey.query.all()
-    fill(100, api_user)
+    # fill_fake(100, fake_location)
+    # locations = FakeLocation.query.all()
+    # fill_fake(100, fake_user)
+    fill_user()
