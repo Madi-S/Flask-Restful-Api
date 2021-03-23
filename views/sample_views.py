@@ -15,8 +15,8 @@ test_create_parser.add_argument(
 
 
 test_update_parser = reqparse.RequestParser()
-test_update_parser.add_argument('name', type=str, help='Specify your name')
 test_update_parser.add_argument('age', type=int, help='Specify your age')
+test_update_parser.add_argument('name', type=str, help='Specify your name')
 test_update_parser.add_argument('location', type=str, help='Specify your location')
 test_update_parser.add_argument('gender', choices=['male', 'female'], help='Specify your gender')
 
