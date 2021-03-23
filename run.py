@@ -1,6 +1,6 @@
-from api_views import Faker
 from app import app, api, logger
-from views import HelloWorld, Health, Test
+from views.faker_views import Faker
+from views.sample_views import HelloWorld, Health, Test
 
 
 if __name__ == '__main__':

@@ -27,7 +27,32 @@ BASE = 'http://127.0.0.1:5000/'
 
 key = APIUser.query.get(1).api_user_key
 
-r = requests.get(BASE + f'/faker/{key}')
+
+payload = {
+    'user_id':5,
+}
+r = requests.put(BASE + f'/faker/{key}', data=payload)
 logger.debug('Response: %s', r)
 logger.debug('JSON: %s', r.json())
 logger.debug('Text: %s', r.text)
+
+
+# payload = {
+#     'user_id':5,
+#     'middle_name': 'Kenzhebolatyuly',
+#     'first_name': 'Madi',
+# }
+# r = requests.put(BASE + f'/faker/{key}', data=payload)
+# logger.debug('Response: %s', r)
+# logger.debug('JSON: %s', r.json())
+# logger.debug('Text: %s', r.text)
+
+
+# payload = {
+#     'last_name': 'Ermakov',
+#     'first_name': 'Artyom',
+# }
+# r = requests.post(BASE + f'/faker/{key}', data=payload)
+# logger.debug('Response: %s', r)
+# logger.debug('JSON: %s', r.json())
+# logger.debug('Text: %s', r.text)
