@@ -37,25 +37,27 @@ def fill_fake(n, func):
 # --- REAL OBJECTS ---
 
 
-def fill_user(n):
+def fill_api_user(n):
     for i in range(100):
         password = '12345'  # f.password()
         username = f.unique.user_name()
         APIUser.create(username, password)
-        logger.debug('API User #%s created %s:%s', i+1, pwd, username)
+        logger.debug('API User #%s created %s:%s', i+1, password, username)
     logger.debug('%s API Users created', 100)
 
 
 if __name__ == '__main__':
-    # db.drop_all()
-    # db.session.commit()
-    # logger.debug('DB TABLES DROPED')
+    db.drop_all()
+    db.session.commit()
+    logger.debug('DB TABLES DROPED')
 
-    # db.create_all()
-    # db.session.commit()
-    # logger.debug('DB TABLES CREATED')
+    db.create_all()
+    db.session.commit()
+    logger.debug('DB TABLES CREATED')
 
-    # fill_fake(100, fake_location)
-    # locations = FakeLocation.query.all()
-    # fill_fake(100, fake_user)
-    fill_user(100)
+    fill_fake(100, fake_location)
+
+    locations = FakeLocation.query.all()
+    fill_fake(100, fake_user)
+
+    fill_api_user(10)
