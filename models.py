@@ -79,7 +79,7 @@ class APIUser(db.Model):
             db.session.commit()
             return True, new_api_key
 
-        return None, None
+        return False, None
 
 
     def change_api_calls_by_n(self, n=1):
@@ -128,13 +128,27 @@ class APIKey(db.Model):
         return key
 
 
-class FakeUser(db.Model):
+class CreateFakeMixin():
+
+    @classmethod
+    def create(cls, **kwargs):
+        try:
+            obj = cls(**kwargs)
+            db.session.add(obj)
+            db.session.commit()
+        except:
+            logger.exception('Failed to create FakeMixn for %s with %s', cls.__name__, kwargs)
+
+
+class FakeUser(CreateFakeMixin, db.Model):
     middle_name = db.Column(db.String(100))
     id = db.Column(db.Integer, primary_key=True)
     last_name = db.Column(db.String(100), nullable=False)
     first_name = db.Column(db.String(100), nullable=False)
 
     location_id = db.Column(db.Integer, db.ForeignKey('fake_location.id'), nullable=False)
+
+    fields = ('middle_name', 'first_name', 'last_name', 'location_id')
 
     def __repr__(self):
         return f'<FakeUser obj #{self.id}: {self.first_name} {self.last_name} {self.last_name}>'
@@ -153,8 +167,20 @@ class FakeUser(db.Model):
             }
         }
 
+    @staticmethod
+    def update(id, **fields):
+        fake_uesr = FakeUser.query.get(id)
+        if fake_user:
+            for column, value in fields:
+                if not column in FakeUser.fields:
+                    return False, None
+                setattr(fake_user, column, value)
+    
+        db.session.commit()
+        return True, fake_uesr
 
-class FakeLocation(db.Model):
+
+class FakeLocation(CreateFakeMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     city = db.Column(db.String(200), nullable=False)
     zipcode = db.Column(db.String(20), nullable=False)
