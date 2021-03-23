@@ -58,4 +58,4 @@ if __name__ == '__main__':
     # fill_fake(100, fake_location)
     # locations = FakeLocation.query.all()
     # fill_fake(100, fake_user)
-    fill_user()
+    fill_user(100)
