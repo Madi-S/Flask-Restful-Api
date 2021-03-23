@@ -1,6 +1,4 @@
 import rq
-import redis
-
 from uuid import uuid4
 from datetime import timedelta
 from app import db, app, logger, bcrypt
@@ -19,11 +17,13 @@ class FlushAPICallsJob(db.Model):
         db.session.commit()
         return True
 
-    @classmethod
-    def create(cls, id, api_key):
-        j = cls(job_id=id, api_user_key=api_key)
+    @staticmethod
+    def create(id, api_key):
+        print('!!!', id)
+        j = FlushAPICallsJob(job_id=id, api_user_key=api_key)
         db.session.add(j)
         db.session.commit()
+        return j
 
 
 class APIUser(db.Model):    
@@ -67,6 +67,11 @@ class APIUser(db.Model):
             db.session.add(user)
             db.session.commit()
             return user
+
+    def jsonified(self):
+        return {
+            
+        }
 
     def refresh_api_key(self):
         if self:
@@ -136,6 +141,7 @@ class CreateFakeMixin():
             obj = cls(**kwargs)
             db.session.add(obj)
             db.session.commit()
+            return obj
         except:
             logger.exception('Failed to create FakeMixn for %s with %s', cls.__name__, kwargs)
 
@@ -151,7 +157,7 @@ class FakeUser(CreateFakeMixin, db.Model):
     fields = ('middle_name', 'first_name', 'last_name', 'location_id')
 
     def __repr__(self):
-        return f'<FakeUser obj #{self.id}: {self.first_name} {self.last_name} {self.last_name}>'
+        return f'<FakeUser obj #{self.id}: {self.first_name} {self.last_name} {self.middle_name}>'
 
     def jsonified(self):
         return {
@@ -169,15 +175,16 @@ class FakeUser(CreateFakeMixin, db.Model):
 
     @staticmethod
     def update(id, **fields):
-        fake_uesr = FakeUser.query.get(id)
+        fake_user = FakeUser.query.get(id)
         if fake_user:
-            for column, value in fields:
+            for column, value in fields.items():
                 if not column in FakeUser.fields:
                     return False, None
-                setattr(fake_user, column, value)
+                if value:
+                    setattr(fake_user, column, value)
     
         db.session.commit()
-        return True, fake_uesr
+        return True, fake_user
 
 
 class FakeLocation(CreateFakeMixin, db.Model):
