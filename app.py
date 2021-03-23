@@ -1,6 +1,7 @@
 import logging
 
 from flask import Flask
+from flask_bcrypt import Bcrypt
 from flask_restful import Api, Resource
 from flask_sqlalchemy import SQLAlchemy
 from config import Configuration
@@ -23,6 +24,8 @@ logger.debug('Flask app instantiated %s', app)
 
 api = Api(app)
 db = SQLAlchemy(app)
+
+bcrypt = Bcrypt(app)
 
 q = Queue(connection=Redis())
 
