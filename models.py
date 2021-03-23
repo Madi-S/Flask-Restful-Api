@@ -3,7 +3,7 @@ import redis
 
 from uuid import uuid4
 from datetime import timedelta
-from app import db, app, logger
+from app import db, app, logger, bcrypt
 
 
 
@@ -34,8 +34,39 @@ class APIUser(db.Model):
     
     api_user_key = db.Column(db.String(200), db.ForeignKey('api_key.key'), nullable=False)
 
+    username = db.Column(db.String(200), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+
     def __repr__(self):
         return f'<APIUser obj #{self.id}: Key: {self.api_user_key}, API Calls: {self.api_calls}/{self.api_calls_limit} per {self.api_call_interval.seconds} seconds>'
+
+
+    @staticmethod
+    def validate_creds(username, password):
+        user = APIUser.query.filter_by(username=username).first()
+
+        if user:
+            password_match = bcrypt.check_password_hash(user.password, str(password))
+            if password_match:
+                return True, 'Successful Login'
+
+            return False, 'Passwords do not match!'
+        return False, f'User {username} does not exist!'
+
+
+    @staticmethod
+    def create_admin(username, password):
+        if not APIUser.query.filter_by(username=username).first():
+            pwd_hash = bcrypt.generate_password_hash(str(password))
+            user = APIUser(
+                username=str(username),
+                password=pwd_hash
+            )
+
+            db.session.add(user)
+            db.session.commit()
+            return True
+            
 
     def change_api_calls_by_n(self, n=1):
         if self:
@@ -83,6 +114,11 @@ class APIKey(db.Model):
     def __repr__(self):
         return f'<APIKey obj #{self.id}: Key: {self.key}, Valid: {self.is_valid}>'
 
+    def abandon(self):
+        if self:
+            self.is_valid = False
+            db.session.commit()
+            return True
 
 class FakeUser(db.Model):
     middle_name = db.Column(db.String(100))
