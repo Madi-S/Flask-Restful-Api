@@ -1,10 +1,32 @@
 from models import FlushAPICallsJob, APIUser, APIKey, FakeUser, FakeLocation
+from flask import request, jsonify, abort, session
 from flask_restful import Resource, reqparse
-from flask import request, jsonify, abort
 from app import app, q, logger
 
+from random import randint
 from functools import wraps
 from datetime import timedelta
+
+# TODO: DECORATOR TO CHECK IF ARQ PARSE HAS THROWN AN ERROR TO DECREMNT API CALLS NUMBER BY 1
+
+
+faker_get_parser = reqparse.RequestParser()
+faker_get_parser.add_argument('user_id', help='Specify user_id (int) to get specific user', type=int, nullable=False)
+faker_get_parser.add_argument('random', help='By passing random a random user will be retrieved', action='store_true')
+
+faker_post_parser = reqparse.RequestParser()
+faker_post_parser.add_argument('first_name', help='Specify first name', required=True, type=str)
+faker_post_parser.add_argument('last_name', help='Specify last name', required=True, type=str)
+faker_post_parser.add_argument('middle_name', help='Specify middle name (optional)', type=str)
+faker_post_parser.add_argument('location_id', help='Specify location id. Fill it blank if you want to use random location id', type=int)
+
+
+faker_put_parser = reqparse.RequestParser()
+faker_put_parser.add_argument('first_name', help='Specify first name (optional)', type=str)
+faker_put_parser.add_argument('last_name', help='Specify last name (optional)', type=str)
+faker_put_parser.add_argument('middle_name', help='Specify middle name (optional)', type=str)
+faker_put_parser.add_argument('location_id', help='Specify location id. Fill it blank if you want to use random location id', type=int)
+
 
 
 def create_jobs_for(api_user):
@@ -36,6 +58,8 @@ def validate_api_key(api_method):
 
         if api_key_obj and api_key_obj.is_valid and api_key_obj.user:
             logger.debug('SUCCESSFUL API KEY VALIDATION')
+
+            session['api_user'] = api_key_obj.user
             return api_method(*args, **kwargs)
         else:
             logger.debug('API KEY VALIDATION FAILED')
@@ -51,7 +75,7 @@ def enqueue_api_calls_flush(api_method):
         logger.debug('IN enqueue_api_calls_flush')
 
         api_key = kwargs.get('api_key')
-        api_user = APIUser.query.filter_by(api_user_key=api_key).first()
+        api_user = session.get('api_user')
 
         job_model = FlushAPICallsJob.query.filter_by(api_user_key=api_key).first()
         
@@ -96,20 +120,19 @@ def check_api_calls_limit(api_method):
     def inner(*args, **kwargs):
         logger.debug('IN check_api_calls_limit')
 
-        api_key = kwargs.get('api_key')
-        api_user = APIUser.query.filter_by(api_user_key=api_key).first()
+        api_user = session.get('api_user')
 
         logger.debug('API USER CALLS %s per %s', api_user.api_calls, api_user.api_calls_limit)
 
         if api_user.api_calls < api_user.api_calls_limit:
-            logger.debug('INCREMENTING API CALLS BY 1')
+            logger.debug('INCREMENTING API CALLS BY 1')            
             api_user.change_api_calls_by_n(n=1)        
 
             return api_method(*args, **kwargs)        
         else:
             logger.debug('API CALLS LIMIT EXCEEDED')
             logger.debug('ABORTING 401')
-            abort(401, f'You have exceeded your API calls limit per {api_user.api_call_interval.seconds} seconds')
+            abort(401, f'You have exceeded your API limit: {api_user.api_calls_limit} calls per {api_user.api_call_interval.seconds} seconds')
 
     return inner
 
@@ -119,19 +142,77 @@ class Faker(Resource):
 
     # Decorators execution order -> from top to bottom 
 
+    # Retrieve
     @validate_api_key
     @enqueue_api_calls_flush
     @check_api_calls_limit
     def get(self, api_key):
-        # args = 
-        # TODO: if args req parser has hrown an error, decrement api calls by 1
         logger.debug('FAKER: IN GET')
-        fake_user = FakeUser.query.get(1)
+        api_user = session.get('api_user')
+        api_user.change_api_calls_by_n(-1)
+
+        args = faker_get_parser.parse_args()
+        logger.debug('PARSED GET ARGS %s', args)
+
+        if not any(args.values()) or all(args.values()):
+            abort(400, 'You cannot specify both "random" and "user_id" parameters or leave the both blank')
+
+        if args['random']:
+            count = int(APIUser.query.count())
+            random_id = randint(1, count)
+            fake_user = APIUser.query.get(random_id)
+
+        elif args['location_id']:
+            n = args['user_id']
+            fake_user = FakeUser.query.get(n)
+
+        api_user.change_api_calls_by_n(1)
         return fake_user.jsonified()
 
+
+    # Update
+    @validate_api_key
+    @enqueue_api_calls_flush
+    @check_api_calls_limit
+    def put(self, api_key):
+        logger.debug('FAKER: IN PUT')
+        api_user = session.get('api_user')
+        api_user.change_api_calls_by_n(-1)
+
+        fields = faker_put_parser.parse_args()
+
+        if not any(fields.values()):
+            abort(400, 'You cannot leave all fields blank, specify at least one field to change FakeUser data')
+
+        updated, fake_user = FakeUser.update(api_user.id, **fields)
+        if not updated:
+            abort(400, 'You have specified can change only these fields: "middle_name", "first_name", "last_name", "location_id"')
+
+        api_user.change_api_calls_by_n(1)
+        return {
+            'updated': updated,
+            'updated_obj': fake_user.jsonified(),
+        }
+        
+
+    # Create
     @validate_api_key
     @check_api_calls_limit
     def post(self, api_key):
         logger.debug('FAKER: IN POST')
-        fake_user = FakeUser.query.get(1)
-        return fake_user.jsonified()
+        api_user = session.get('api_user')
+        api_user.change_api_calls_by_n(-1)
+
+        fields = faker_post_parser.parse_args()
+        if not fields['location_id']:
+            count = int(FakeLocation.query.count())
+            random_id = randint(1, count)
+            fields['location_id'] = FakeLocation.query.get(random_id).id
+
+        fake_user = FakeUser.create(**fields)
+
+        api_user.change_api_calls_by_n(1)
+        return { 
+            'created': True, 
+            'created_obj': fake_user.jsonified(),
+        }
