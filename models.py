@@ -66,7 +66,21 @@ class APIUser(db.Model):
 
             db.session.add(user)
             db.session.commit()
-            return True
+            return user
+
+    def refresh_api_key(self):
+        if self:
+            api_key_obj = self.key_obj
+            api_key_obj.is_valid = False
+
+            new_api_key = APIKey.create().key
+            self.api_user_key = new_api_key
+
+            db.session.commit()
+            return True, new_api_key
+
+        return None, None
+
 
     def change_api_calls_by_n(self, n=1):
         if self:
@@ -104,12 +118,6 @@ class APIKey(db.Model):
 
     def __repr__(self):
         return f'<APIKey obj #{self.id}: Key: {self.key}, Valid: {self.is_valid}>'
-
-    def abandon(self):
-        if self:
-            self.is_valid = False
-            db.session.commit()
-            return True
 
     @staticmethod
     def create():
