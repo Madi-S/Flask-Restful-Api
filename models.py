@@ -34,12 +34,11 @@ class APIUser(db.Model):
     
     api_user_key = db.Column(db.String(200), db.ForeignKey('api_key.key'), nullable=False)
 
+    password = db.Column(db.LargeBinary, nullable=False)
     username = db.Column(db.String(200), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
 
     def __repr__(self):
         return f'<APIUser obj #{self.id}: Key: {self.api_user_key}, API Calls: {self.api_calls}/{self.api_calls_limit} per {self.api_call_interval.seconds} seconds>'
-
 
     @staticmethod
     def validate_creds(username, password):
@@ -53,20 +52,21 @@ class APIUser(db.Model):
             return False, 'Passwords do not match!'
         return False, f'User {username} does not exist!'
 
-
     @staticmethod
-    def create_admin(username, password):
+    def create(username, password):
         if not APIUser.query.filter_by(username=username).first():
             pwd_hash = bcrypt.generate_password_hash(str(password))
+            api_key = APIKey.create().key
+
             user = APIUser(
-                username=str(username),
-                password=pwd_hash
+                username=username,
+                password=pwd_hash,
+                api_user_key=api_key
             )
 
             db.session.add(user)
             db.session.commit()
             return True
-            
 
     def change_api_calls_by_n(self, n=1):
         if self:
@@ -94,15 +94,6 @@ class APIUser(db.Model):
             logger.debug('AFTER: API_USER %s', user)
             return True
 
-    @staticmethod
-    def create(api_key):
-        try:
-            user = APIUser(api_user_key=api_key)
-            db.session.add(user)
-            db.session.commit()
-        except:
-            pass
-
 
 class APIKey(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -119,6 +110,15 @@ class APIKey(db.Model):
             self.is_valid = False
             db.session.commit()
             return True
+
+    @staticmethod
+    def create():
+        key = APIKey()
+        
+        db.session.add(key)
+        db.session.commit()
+        return key
+
 
 class FakeUser(db.Model):
     middle_name = db.Column(db.String(100))
