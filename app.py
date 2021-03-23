@@ -27,7 +27,8 @@ db = SQLAlchemy(app)
 
 bcrypt = Bcrypt(app)
 
-q = Queue(connection=Redis())
+conn = Redis('127.0.0.1', 6379)
+q = Queue(connection=conn)
 
 '''
 'acquire_cleaning_lock', 'all', 'compact', 'connection', 'count', 'create_job', 
