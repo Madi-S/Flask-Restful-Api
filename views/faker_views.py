@@ -10,18 +10,17 @@ from datetime import timedelta
 # TODO: DECORATOR TO CHECK IF ARQ PARSE HAS THROWN AN ERROR TO DECREMNT API CALLS NUMBER BY 1
 
 
-faker_get_parser = reqparse.RequestParser()
+faker_get_parser = reqparse.RequestParser(bundle_errors=True)
 faker_get_parser.add_argument('user_id', help='Specify user_id (int) to get specific user', type=int, nullable=False)
 faker_get_parser.add_argument('random', help='By passing random a random user will be retrieved', action='store_true')
 
-faker_post_parser = reqparse.RequestParser()
+faker_post_parser = reqparse.RequestParser(bundle_errors=True)
 faker_post_parser.add_argument('first_name', help='Specify first name', required=True, type=str)
 faker_post_parser.add_argument('last_name', help='Specify last name', required=True, type=str)
 faker_post_parser.add_argument('middle_name', help='Specify middle name (optional)', type=str)
 faker_post_parser.add_argument('location_id', help='Specify location id. Fill it blank if you want to use random location id', type=int)
 
-
-faker_put_parser = reqparse.RequestParser()
+faker_put_parser = reqparse.RequestParser(bundle_errors=True)
 faker_put_parser.add_argument('first_name', help='Specify first name (optional)', type=str)
 faker_put_parser.add_argument('last_name', help='Specify last name (optional)', type=str)
 faker_put_parser.add_argument('middle_name', help='Specify middle name (optional)', type=str)
