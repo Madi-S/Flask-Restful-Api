@@ -5,25 +5,25 @@ from app import db, app, logger, bcrypt
 
 
 
-class FlushAPICallsJob(db.Model):
-    job_id = db.Column(db.String(36), primary_key=True)
-    api_user_key = db.Column(db.Integer, db.ForeignKey('api_user.api_user_key'))
+# class FlushAPICallsJob(db.Model):
+#     job_id = db.Column(db.String(36), primary_key=True)
+#     api_user_key = db.Column(db.Integer, db.ForeignKey('api_user.api_user_key'))
 
-    def __repr__(self):
-        return f'<FlushAPICallsTask obj #{self.job_id}: API User Key: {self.api_user_key}>'
+#     def __repr__(self):
+#         return f'<FlushAPICallsTask obj #{self.job_id}: API User Key: {self.api_user_key}>'
 
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-        return True
+#     def delete(self):
+#         db.session.delete(self)
+#         db.session.commit()
+#         return True
 
-    @staticmethod
-    def create(id, api_key):
-        print('!!!', id)
-        j = FlushAPICallsJob(job_id=id, api_user_key=api_key)
-        db.session.add(j)
-        db.session.commit()
-        return j
+#     @staticmethod
+#     def create(id, api_key):
+#         print('!!!', id)
+#         j = FlushAPICallsJob(job_id=id, api_user_key=api_key)
+#         db.session.add(j)
+#         db.session.commit()
+#         return j
 
 
 class APIUser(db.Model):    
