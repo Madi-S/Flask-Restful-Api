@@ -1,4 +1,4 @@
-from models import FlushAPICallsJob, APIUser, APIKey, FakeUser, FakeLocation
+from models import APIUser, APIKey, FakeUser, FakeLocation
 from flask import request, jsonify, abort, session
 from flask_restful import Resource, reqparse
 from app import app, q, logger, conn
@@ -6,7 +6,6 @@ from app import app, q, logger, conn
 from random import randint
 from functools import wraps
 from datetime import timedelta
-from rq.job import Job
 
 # TODO: DECORATOR TO CHECK IF ARQ PARSE HAS THROWN AN ERROR TO DECREMNT API CALLS NUMBER BY 1
 
@@ -62,58 +61,44 @@ def validate_api_key(api_method):
 
 def enqueue_api_calls_flush(api_method):
 
-    def create_jobs_for(api_user):
-        api_key = api_user.api_user_key
-        func = api_user.flush_api_calls
-        interval = api_user.api_call_interval
-
-        rq_job = q.enqueue_in(interval, func, (api_key, ))
-        logger.debug('RQ JOB CREAETD %s', rq_job)
-        
-        job_model = FlushAPICallsJob.create(rq_job.id, api_key)
-        logger.debug('JOB MODEL CREATED %s', job_model)
-
-
     @wraps(api_method)
     def inner(*args, **kwargs):
+
+        def create_job():
+            func = api_user.flush_api_calls
+            interval = api_user.api_call_interval
+
+            job = q.enqueue_in(interval, func, (api_key, ), job_id=api_key)
+            logger.debug('JOB CREAETD %s', job)
+
+
         logger.debug('IN enqueue_api_calls_flush')
 
         api_key = kwargs.get('api_key')
         api_user = APIUser.query.filter_by(api_user_key=api_key).first()
-
-        job_model = FlushAPICallsJob.query.filter_by(api_user_key=api_key).first()
+        job = q.fetch_job(api_key)
         
-        if job_model:
-            try:
-                logger.debug('JOB MODEL EXISTS %s', job_model)
-                job_id = job_model.job_id
-                logger.debug('JOB ID %s', job_id)
-                rq_job = Job.fetch(job_id, connection=conn)
-                logger.debug('REDIS QUEUE JOB %s', rq_job)
-            except Exception as e:
-                logger.debug('NO JOBS FOUND %s', e)
-                rq_job = None
+        logger.debug('CHECKING FOR EXISTING JOB %s', job)
 
-        # Creating new Job to flush api calls in 10 seconds, anf of course granting user access to our APIs, since there were no jobs -> hence no limitations
-        if not (job_model and rq_job):             
+        # Creating new Job to flush api calls in 10 seconds, and of course granting user access to our APIs, since there were no jobs -> hence no limitations
+        if not job:             
             logger.debug('CREATING NEW JOB FOR %s', api_key)
-            create_jobs_for(api_user) 
+            create_job()
 
         # Deleting existing jobs and createing new ones, if api calls limit was not exceeded or if current job is finished
         else:
-            logger.debug('RQ JOB IS ENQUEUED AT %s', rq_job.enqueued_at)
-            logger.debug('IS JOB FINISHED? %s', rq_job.is_finished)
+            logger.debug('JOB IS ENQUEUED AT %s', job.enqueued_at)
+            logger.debug('IS JOB FINISHED? %s', job.is_finished)
 
-            if rq_job.is_finished or api_user.api_calls == api_user.api_calls_limit:
-                logger.debug('JOB IS FINISHED OR API CALLS LIMIT WAS NOT EXCEEDED')            
-                rq_job.cancel()
-                job_model.delete()
-                logger.debug('JOBS DELETED')
-
-                create_jobs_for(api_user)
-            else:
-                logger.debug('API CALLS LIMIT IS EXCEEDED')
+            if api_user.api_calls == api_user.api_calls_limit:
                 logger.debug('NOT OVERWRITING EXISTING JOB TO AVOID CONTINIOUS LIMITATIONS FOR USER')
+            else:
+                if not job.is_finished:
+                    # job.delete()
+                    job.cancel()
+                    logger.debug('JOB NOT FINISHED -> CANCELING IT')
+                logger.debug('CREATING NEW JOB SINCE API CALLS LIMIT NOT EXCEEDED')
+                create_job()
 
         logger.debug('RETURNING API METHOD')
         return api_method(*args, **kwargs)        
