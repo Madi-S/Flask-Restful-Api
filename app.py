@@ -1,4 +1,4 @@
-import logging
+from logger import logger
 
 from flask import Flask
 from flask_bcrypt import Bcrypt
@@ -10,24 +10,12 @@ from redis import Redis
 from rq import Queue
 
 
-logger = logging.getLogger('API')
-
-formatter = logging.Formatter('*** %(levelname)s - %(message)s')
-
-handler = logging.StreamHandler()
-handler.setLevel(logging.DEBUG)
-handler.setFormatter(formatter)
-
-logger.setLevel(logging.DEBUG)
-logger.addHandler(handler)
-
 app = Flask(__name__)
 app.config.from_object(Configuration)
 logger.debug('Flask app instantiated %s', app)
 
 api = Api(app)
 db = SQLAlchemy(app)
-
 bcrypt = Bcrypt(app)
 
 conn = Redis('127.0.0.1', 6379)
