@@ -7,7 +7,7 @@ from random import randint
 from functools import wraps
 from datetime import timedelta
 
-# TODO: DECORATOR TO CHECK IF ARQ PARSE HAS THROWN AN ERROR TO DECREMNT API CALLS NUMBER BY 1
+# TODO: DECORATOR TO CHECK IF ARG PARSE HAS THROWN AN ERROR TO DECREMNT API CALLS NUMBER BY 1
 
 
 faker_get_parser = reqparse.RequestParser(bundle_errors=True)
@@ -27,9 +27,6 @@ faker_post_parser.add_argument('first_name', help='Specify first name', required
 faker_post_parser.add_argument('last_name', help='Specify last name', required=True, type=str)
 faker_post_parser.add_argument('middle_name', help='Specify middle name (optional)', type=str)
 faker_post_parser.add_argument('location_id', help='Specify location id. Fill it blank if you want to use random location id', type=int)
-
-
-
 
 
 
