@@ -1,13 +1,18 @@
-from logger import logger
-
 from flask import Flask
+from flask_admin import Admin
 from flask_bcrypt import Bcrypt
-from flask_restful import Api, Resource
+from flask_caching import Cache
+from flask_migrate import Migrate
+from flask_analytics import Analytics
 from flask_sqlalchemy import SQLAlchemy
-from config import Configuration
+from flask_restful import Api, Resource
+from flask_googlemaps import GoogleMaps
 
-from redis import Redis
+
 from rq import Queue
+from redis import Redis
+from logger import logger
+from config import Configuration
 
 
 app = Flask(__name__)
@@ -17,6 +22,15 @@ logger.debug('Flask app instantiated %s', app)
 api = Api(app)
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
+migrate = Migrate(app, db)
+cache = Cache(app)
+admin = Admin(app, 'Restful', template_mode='bootstrap3')
+
+GoogleMaps(app)
+
+Analytics(app)
+app.config['ANALYTICS']['GAUGES']['SITE_ID'] = 'XXXXXXXXXXXXX'
+
 
 conn = Redis('127.0.0.1', 6379)
 q = Queue(connection=conn)
