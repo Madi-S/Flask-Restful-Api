@@ -37,7 +37,7 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route('/index')
+@app.route('/')
 def index():
     return render_template('index.html')
 
