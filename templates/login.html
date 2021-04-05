@@ -5,25 +5,30 @@
 {% endblock %}
 
 {% block content_title %}
-  Hello Wanderer!
+  Hello Wanderer! You can login here
 {% endblock %}
 
 {% block content %}
 
 {% macro render_field(field) %}
-  
-    <div class="mb-3">
-        <label for="{{ field.label.text }}" class="form-label">{{ field.label.text|capitalize  }}</label>
-        <input type="text" class="form-control" id="{{ field.label.text }}">
-    </div>
-
+    <label for="{{ field.label.text }}" class="form-label">{{ field.label.text|capitalize  }}</label>
+    <dd>
+        {{ field(class="form-control", id="field.label.text", **kwargs)|safe }}
+        {% if field.errors %}
+            <ul class=errors>
+            {% for error in field.errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    </dd>
 {% endmacro %}
 
 <form action="{{ url_for('login') }}" method="POST">
     {% for field in form.visible_fields %}
         {{ render_field(field) }}
     {% endfor %}
-
+    <br>
     {{ form.hidden_tag() }}
     {{ form.submit(class='btn btn-dark') }}     
 </form>
