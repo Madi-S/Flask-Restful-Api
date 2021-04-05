@@ -1,157 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
-  
-    <title>
-        {% block title %}
 
-        {% endblock %} | EazyAPI
+    <title>
+        {% block title %} {% endblock %} | EazyAPI
     </title>
-    
+
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
-    
+
     <!-- For code snippets -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/highlight.min.js"></script>
-    <script>hljs.initHighlightingOnLoad();</script>
-    
+    <script>
+        hljs.initHighlightingOnLoad();
+    </script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Pacifico&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Kiwi+Maru:wght@500&family=Pacifico&display=swap" rel="stylesheet">
-    
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
     <style>
-      .navbar-text {
-          font-family: 'Kiwi Maru', serif; 
-      }
-      
-      .brand-text {
-          font-family: 'Pacifico', cursive;
-      }
+        .navbar-text {
+            font-family: 'Kiwi Maru', serif;
+        }
+        
+        .brand-text {
+            font-family: 'Pacifico', cursive;
+        }
     </style>
-    
-  </head>
+
+</head>
 
 <body>
 
-  {% set searchable_text = ('Cats', 'Hariless Dogs', 'John Doe', 'Foe Bar', 'Documentation', 'What is python?', 'Type here ...', 'African tigers') %}
-  {% set user_logged_in = 'user' in session %}
+    {% set searchable_text = ('Cats', 'Hariless Dogs', 'John Doe', 'Foe Bar', 'Documentation', 'What is python?', 'Type here ...', 'African tigers') %} {% set user_logged_in = 'user' in session %} {% with messages = get_flashed_messages(with_categories=true)
+    %} {% if messages %} {% for category, message in messages %}
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-
-      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
         <strong>Hey!</strong> {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-        
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
+    </div>
 
-
-      
+    {% endfor %} {% endif %} {% endwith %}
 
 
 
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container-fluid">
-      <a class="navbar-brand brand-text" href="{{ url_for('index') }}">EazyAPI</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+
+
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand brand-text" href="{{ url_for('index') }}">EazyAPI</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse navbar-text" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <div class="collapse navbar-collapse navbar-text" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-          <li class="nav-item">
-            <a class="nav-link {% if request.path == '/example' %} active {% endif %}" aria-current="page" href="{{ url_for('example') }}">Example</a>
-          </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/example' %} active {% endif %}" aria-current="page" href="{{ url_for('example') }}">Example</a>
+                    </li>
 
-          <li class="nav-item">
-            <a class="nav-link {% if request.path == '/pricing' %} active {% endif %}" aria-current="page" href="{{ url_for('pricing') }}">Pricing</a>
-          </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/pricing' %} active {% endif %}" aria-current="page" href="{{ url_for('pricing') }}">Pricing</a>
+                    </li>
 
-          {% if user_logged_in %}
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-          </li>
-          {% else %}
-          <li class="nav-item">
-            <a class="nav-link {% if request.path == '/login' %} active {% endif %}" href="{{ url_for('login') }}">Login</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.path == '/register' %} active {% endif %}" href="{{ url_for('register') }}">Register</a>
-          </li>
-          {% endif %}
-          
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Contant me
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item" href="https://github.com/Madi-S">Github</a></li>
-              <li><a class="dropdown-item" href="tg://resolve?domain=MrMadi">Telegram</a></li>
-              <li><a class="dropdown-item" href="https://wa.me/87784156868?text=Hey Madi!">WhatsApp</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="mailto:khovansky99@gmail.com">Email</a></li>
-            </ul>
-          </li>
+                    {% if user_logged_in %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/login' %} active {% endif %}" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/register' %} active {% endif %}" href="{{ url_for('register') }}">Register</a>
+                    </li>
+                    {% endif %}
 
-          {% if user_logged_in %}
-          <li class="nav-item">
-            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">{{ session.get('user').username }}</a>
-          </li>
-          {% endif %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Contant me
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="https://github.com/Madi-S">Github</a></li>
+                            <li><a class="dropdown-item" href="tg://resolve?domain=MrMadi">Telegram</a></li>
+                            <li><a class="dropdown-item" href="https://wa.me/87784156868?text=Hey Madi!">WhatsApp</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="mailto:khovansky99@gmail.com">Email</a></li>
+                        </ul>
+                    </li>
 
-        </ul>
-        <form class="d-flex">
-          <input class="form-control me-2" type="search" placeholder="{{ searchable_text|random }}" aria-label="Search">
-          <button class="btn btn-outline-dark" type="submit">Search</button>
-        </form>
-      </div>
+                    {% if user_logged_in %}
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">{{ session.get('username')|upper }}</a>
+                    </li>
+                    {% endif %}                    
+
+                </ul>
+                <div class="d-flex">
+                    <input class="form-control me-2" id="searchbox" type="search" placeholder="{{ searchable_text|random }}" aria-label="Search">
+                    <button class="btn btn-outline-dark" disabled type="submit">Search</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+    <div class="row">
+        <div class="col-md-11 offset-md-1">
+            <br>
+
+            <h1>{% block content_title %} {% endblock %} </h1>
+
+        </div>
+
+        <div class="col-md-8 offset-md-1">
+            <br> {% block content %} {% endblock %}
+
+        </div>
+
+        <div id="searchResults">
+
+        </div>
     </div>
-  </nav>
 
-
-  <div class="row">
-    <div class="col-md-11 offset-md-1">
-      <br>
-
-      <h1>{% block content_title %} {% endblock %} </h1>
-
-    </div>
-
-    <div class="col-md-8 offset-md-1">
-      <br>
-      
-      {% block content %}
-
-      {% endblock %}
-
-    </div>
-  </div>
-
-
-
-
-
- 
-  
-
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
     
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(function(){ 
+            $("#searchbox").on("input",function(e){
+                searchText = $("#searchbox").val();
+                console.log(searchText);
+                $.ajax({
+                    method:"post",
+                    url:"/search",
+                    data:{text:searchText},
+                    success:function(res){
+                        var data = "<ul>";
+                        $.each(res,function(index,value){
+                            data += "<li>"+value.object+"</li>";
+                        });
+                        data += "</ul>";
+                        $("#searchResults").html(data);
+                    }
+                });
+            });
+        });
+    </script>
 
 
 </body>
+
+
 
 </html>
