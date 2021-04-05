@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Greetings Page
+{% endblock %}
+
+{% block content_title %}
+  Hello Wanderer!
+{% endblock %}
+
+{% block content %}
+
+{% macro render_field(field) %}
+  
+    <div class="mb-3">
+        <label for="{{ field.label.text }}" class="form-label">{{ field.label.text|capitalize  }}</label>
+        <input type="text" class="form-control" id="{{ field.label.text }}">
+    </div>
+
+{% endmacro %}
+
+<form action="{{ url_for('login') }}" method="POST">
+    {% for field in form.visible_fields %}
+        {{ render_field(field) }}
+    {% endfor %}
+
+    {{ form.hidden_tag() }}
+    {{ form.submit(class='btn btn-dark') }}     
+</form>
+
+
+{% endblock %}
