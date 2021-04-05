@@ -4,6 +4,7 @@ from flask import render_template, redirect, url_for, request, session, flash, s
 
 from functools import wraps
 from models import APIUser, APIKey, db
+from forms import LoginForm, RegistrationForm
 
 import os
 
@@ -26,15 +27,27 @@ def login_required(f):
     return inner
 
 
+@app.route('/example')
+def example():
+    return render_template('example.html')
 
-@app.route('/register')
+@app.route('/pricing')
+def pricing():
+    return render_template('pricing.html')
+
+
+@app.route('/register', methods=['POST', 'GET'])
 def register():
-    return render_template('index.html')
+    if request.method == 'GET':
+        form = RegistrationForm()
+        return render_template('register.html', form=form)
 
 
-@app.route('/login')
+@app.route('/login', methods=['POST', 'GET'])
 def login():
-    return render_template('index.html')
+    if request.method == 'GET':
+        form = LoginForm()
+        return render_template('login.html', form=form)
 
 @app.route('/logout')
 def logout():
@@ -49,4 +62,4 @@ def index():
 
 @app.route('/favicon.ico')
 def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'images/favicon.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'img/favicon.ico', mimetype='image/vnd.microsoft.icon')
