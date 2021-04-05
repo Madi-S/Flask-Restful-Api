@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Python Code Snippets
+{% endblock %}
+
+{% block content_title %}
+    Python 3.7 code snippets
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+
+  <div class="bd-clipboard">
+    <button type="button" class="btn btn-dark" onclick="copyDivToClipboard()" >Copy</button>
+  </div>
+
+  <pre>
+    <code class="python" id="code">
+      def fib(n):
+        a, b = 0, 1
+        while a < n:
+          print(a, end=' ')
+          a, b = b, a+b
+          print()
+      fib(1000)
+    </code>
+  </pre>
+
+</div>
+
+<script>
+  function copyDivToClipboard() {
+    var range = document.createRange();
+    range.selectNode(document.getElementById("code"));
+    window.getSelection().removeAllRanges(); // clear current selection
+    window.getSelection().addRange(range); // to select text
+    document.execCommand("copy");
+    window.getSelection().removeAllRanges();// to deselect
+}
+</script>
+
+  
+
+{% endblock %}
