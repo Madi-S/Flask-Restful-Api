@@ -27,9 +27,14 @@ def login_required(f):
 
 
 
+@app.route('/register')
+def register():
+    return render_template('index.html')
+
+
 @app.route('/login')
 def login():
-    pass
+    return render_template('index.html')
 
 @app.route('/logout')
 def logout():
