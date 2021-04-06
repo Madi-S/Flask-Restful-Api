@@ -26,8 +26,6 @@ migrate = Migrate(app, db)
 cache = Cache(app)
 admin = Admin(app, 'Restful', template_mode='bootstrap3')
 
-GoogleMaps(app)
-
 Analytics(app)
 app.config['ANALYTICS']['GAUGES']['SITE_ID'] = 'XXXXXXXXXXXXX'
 
