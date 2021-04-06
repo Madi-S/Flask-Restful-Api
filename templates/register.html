@@ -13,7 +13,7 @@
 {% macro render_field(field) %}
     <label for="{{ field.label.text }}" class="form-label">{{ field.label.text|capitalize  }}</label>
     <dd>
-        {{ field(class="form-control", id="field.label.text", **kwargs)|safe }}
+        {{ field(class="form-control", id=field.label.text, **kwargs)|safe }}
         {% if field.errors %}
             <ul class=errors>
             {% for error in field.errors %}
@@ -24,7 +24,7 @@
     </dd>
 {% endmacro %}
 
-<form action="{{ url_for('login') }}" method="POST">
+<form action="{{ url_for('register') }}" method="POST">
     {% for field in form.visible_fields %}
         {{ render_field(field) }}
     {% endfor %}

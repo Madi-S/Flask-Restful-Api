@@ -13,7 +13,7 @@
 {% macro render_field(field) %}
     <label for="{{ field.label.text }}" class="form-label">{{ field.label.text|capitalize  }}</label>
     <dd>
-        {{ field(class="form-control", id="field.label.text", **kwargs)|safe }}
+        {{ field(class="form-control", id=field.label.text, **kwargs)|safe }}
         {% if field.errors %}
             <ul class=errors>
             {% for error in field.errors %}
