@@ -136,6 +136,15 @@ def logout():
     return redirect(url_for('index'))
 
 
+@app.route('/profile/<username>')
+def profile(username):
+    api_key = None
+    if username == session.get('username'):
+        # api_key = APIUser.query.filter_by(username).api_user_key
+        api_key = 'xzlfj2329083421093sadjf;1j2bnsdlkfj32w04-0dsf'
+
+    return render_template('profile.html', api_key=api_key)
+
 @app.route('/search', methods=['POST'])
 def search():
     text = request.form.get('text')
