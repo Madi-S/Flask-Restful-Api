@@ -10,30 +10,86 @@
 
 {% block content %}
 
-<div class="row">
+  <div class="col-md-11">
+  
+    {# <img src="{{ url_for('static', filename='img/example.svg') }}" class="img-thumbnail" alt="Code Snippets"> #}
+  
+    <h3>GET Request
+        <button type="button" class="btn btn-dark btn-sm" onclick="copyDivToClipboard('get')">Copy</button>
+    </h3>
 
-  <div class="bd-clipboard">
-    <button type="button" class="btn btn-dark" onclick="copyDivToClipboard()" >Copy</button>
+
+    <pre>
+      <code class="python" id="get">
+        '''Retrieve user data'''
+        import requests
+
+        api_key = 'YOUR API KEY'
+
+        payload = {
+          'user_id':5,
+        }
+
+        r = requests.get(f'https://eazy-api/faker/{api_key}', data=payload)
+
+        print(r.json())
+      </code>
+    </pre>
+
+    <h3>POST Request
+      <button type="button" class="btn btn-dark btn-sm" onclick="copyDivToClipboard('post')">Copy</button>
+    </h3>
+
+
+    <pre>
+      <code class="python" id="post">
+        '''Create user'''
+        import requests
+
+        api_key = 'YOUR API KEY'
+
+        payload = {
+          'last_name': 'Ermakov',
+          'first_name': 'Artyom',
+          # 'location_id': int Optional field
+        }
+
+        r = requests.get(f'https://eazy-api/faker/{api_key}', data=payload)
+
+        print(r.json())
+      </code>
+    </pre>
+
+    <h3>PUT Request
+      <button type="button" class="btn btn-dark btn-sm" onclick="copyDivToClipboard('put')">Copy</button>
+    </h3>
+
+
+    <pre>
+      <code class="python" id="put">
+        '''Update user data'''
+        import requests
+
+        api_key = 'YOUR API KEY'
+
+        payload = {
+          'user_id':5,
+          'middle_name': 'Kenzhebolatyuly',
+          'first_name': 'Madi',
+        }
+
+        r = requests.get(f'https://eazy-api/faker/{api_key}', data=payload)
+
+        print(r.json())
+      </code>
+    </pre>
+
   </div>
 
-  <pre>
-    <code class="python" id="code">
-      def fib(n):
-        a, b = 0, 1
-        while a < n:
-          print(a, end=' ')
-          a, b = b, a+b
-          print()
-      fib(1000)
-    </code>
-  </pre>
-
-</div>
-
 <script>
-  function copyDivToClipboard() {
+  function copyDivToClipboard(id) {
     var range = document.createRange();
-    range.selectNode(document.getElementById("code"));
+    range.selectNode(document.getElementById(id));
     window.getSelection().removeAllRanges(); // clear current selection
     window.getSelection().addRange(range); // to select text
     document.execCommand("copy");
