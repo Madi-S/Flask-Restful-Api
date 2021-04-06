@@ -87,30 +87,29 @@ def pricing():
                            )
 
 
-@app.route('/register', methods=['POST', 'GET'])
-def register():
-    form = RegistrationForm()
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    form = LoginForm()
     if request.method == 'POST':
         if form.validate_on_submit():
             username = form.username.data
             password = form.password.data
 
-            success = APIUser.validate_creds(username, password)
+            success, msg = APIUser.validate_creds(username, password)
             if success:
-                flash('Successful Login')
+                flash(msg)
                 return redirect(url_for('index'))
             else:
-                flash('Username and/or password do not match')
-
+                flash(msg)
         else:
-            flash('Registration failed')
+            flash('Login failed')
 
-    return render_template('register.html', form=form)
+    return render_template('login.html', form=form)
 
 
-@app.route('/login', methods=['POST', 'GET'])
-def login():
-    form = LoginForm()
+@app.route('/register', methods=['POST', 'GET'])
+def register():
+    form = RegistrationForm()
     if request.method == 'POST':
         if form.validate_on_submit():
             username = form.username.data
@@ -127,7 +126,7 @@ def login():
         else:
             flash('Registration failed')
 
-    return render_template('login.html', form=form)
+    return render_template('register.html', form=form)
 
 
 @app.route('/logout')
@@ -140,11 +139,17 @@ def logout():
 @app.route('/search', methods=['POST'])
 def search():
     text = request.form.get('text')
-    # search = f'%{text}%'
-    # results = APIUser.query.filter(APIUser.username.like(search)).all()
-    # return jsonify(results)
+    search = f'%{text}%'
+    users = APIUser.query.filter(APIUser.username.like(search)).all()[:10]
+    data = []
+    for user in users:
+        print(user)
+        data.append({
+            'username': user.username
+        })
+    return jsonify(data)
 
-    return jsonify(({'object': 'result1'}, {'object': 'result2'}, {'object': 'result3'}, {'object': 'result3'}, {'object': 'result4'}))
+    # return jsonify(({'object': 'result1'}, {'object': 'result2'}, {'object': 'result3'}, {'object': 'result3'}, {'object': 'result4'}))
 
 
 @app.route('/')
