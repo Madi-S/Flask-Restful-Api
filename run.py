@@ -21,3 +21,6 @@ if __name__ == '__main__':
 
     # Don't forget to run redis worker:
     # rq worker --with-scheduler
+
+    # Authorize with strip account:
+    # stripe login
