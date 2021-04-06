@@ -11,3 +11,7 @@ class Configuration:
 
     CACHE_TYPE = 'SimpleCache'
     CACHE_DEFAULT_TIMEOUT = 300
+
+    
+    STRIPE_PUBLIC_KEY = environ.get('STRIPE_PUBLIC_KEY')
+    STRIPE_SECRET_KEY = environ.get('STRIPE_SECRET_KEY') 
