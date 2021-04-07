@@ -138,12 +138,20 @@ def logout():
 
 @app.route('/profile/<username>')
 def profile(username):
-    api_key = None
-    if username == session.get('username'):
-        # api_key = APIUser.query.filter_by(username).api_user_key
-        api_key = 'xzlfj2329083421093sadjf;1j2bnsdlkfj32w04-0dsf'
+    user_data = {'username': username}
+    user = APIUser.query.filter_by(username).first()
 
-    return render_template('profile.html', api_key=api_key)
+    if not user:
+        flash(f'Sorry, but user {username} does not exist')
+        return redirect(url_for('index'))
+
+    if username == session.get('username'):
+        user_data['api_key'] = user.api_user_key
+    else:
+        user_data['api_key'] = user.api_user_key[:10] + '*************'
+
+    return render_template('profile.html', user_data=user_data)
+
 
 @app.route('/search', methods=['POST'])
 def search():
