@@ -156,7 +156,7 @@
                     success: function(res){
                         var data = '<div class="results"><h2>Search Results for ' + searchText + '</h2>';
                         $.each(res,function(index, value){
-                            data += '<p><a href="#">' + value.username + "</a></p>";
+                            data += '<p><a href="/profile/' + value.username + '">' + value.username + "</a></p>";
                             console.log(value.username);
                         });
                         data += "</div>";
