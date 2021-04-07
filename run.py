@@ -24,3 +24,6 @@ if __name__ == '__main__':
 
     # Authorize with strip account:
     # stripe login
+
+    # Running via uWSGI:
+    # uwsgi app.ini
