@@ -1,3 +1,4 @@
+from jobs import *
 from app import app, admin, logger, api
 from flask_admin.contrib.sqla import ModelView
 from flask import render_template, redirect, jsonify, url_for, request, session, flash, send_from_directory
@@ -139,7 +140,7 @@ def logout():
 @app.route('/profile/<username>')
 def profile(username):
     user_data = {'username': username}
-    user = APIUser.query.filter_by(username).first()
+    user = APIUser.query.filter_by(username=username).first()
 
     if not user:
         flash(f'Sorry, but user {username} does not exist')
@@ -171,6 +172,8 @@ def search():
 
 @app.route('/')
 def index():
+    sleep_thread()
+    send_email_to()
     return render_template('index.html')
 
 
