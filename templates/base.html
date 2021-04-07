@@ -44,7 +44,7 @@
 <body>
 
     {% set searchable_text = ('Cats', 'Hariless Dogs', 'John Doe', 'Foe Bar', 'Documentation', 'What is python?', 'Type here ...', 'African tigers') %} 
-    {% set user_logged_in = 'user' in session %} 
+    {% set uesrname = session.get('username') %} 
     {% with messages = get_flashed_messages(with_categories=true) %} 
         {% if messages %}
             {% for category, message in messages %}
@@ -105,17 +105,16 @@
                         </ul>
                     </li>
 
-                    {% if user_logged_in %}
+                    {% if username %}
                     <li class="nav-item">
-                        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">{{ session.get('username')|upper }}</a>
-                    </li>
-                    {% endif %}                    
+                        <a class="nav-link" href="{{ url_for('profile', username=username) }}" tabindex="-1" aria-disabled="true">{{ uesrname|upper }}</a>
+                    </li>    
+                    {% endif %}
 
                 </ul>
                 <div class="d-flex">
                     <input class="form-control me-2" id="searchbox" type="search" placeholder="{{ searchable_text|random }}" aria-label="Search">
                     <button class="btn btn-outline-dark" disabled type="submit">Search</button>
-                    
                 </div>
                   
             </div>
