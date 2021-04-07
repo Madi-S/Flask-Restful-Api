@@ -9,5 +9,14 @@
 {% endblock %}
 
 {% block content %}
-
+<div align="center">
+<div class="card" style="width: 18rem;">
+    <img src="{{ url_for('static', filename='img/male_avatar.svg') }}" class="card-img-top" alt="user-male">
+    <div class="card-body">
+      <h5 class="card-title">{{ user_data.username }}</h5>
+      <p class="card-text">Apparently, this user prefers to keep an air of mystery about them.</p>
+      <a href="{{ url_for('index') }}" class="btn btn-primary">Go home</a>
+    </div>
+  </div>
+</div>
 {% endblock %}
