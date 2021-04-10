@@ -10,6 +10,71 @@
 
 {% block content %}
 
+<h2>Chat</h2>
+
+
+<div class="card">
+  <ul id="messages" class="list-group list-group-flush">
+    <li class="list-group-item"><b>Be nice in chat! (Do not say 'foe' or 'bar')</b></li>
+
+    {% for msg in msgs %}
+
+      <li class="list-group-item">
+        {% set display_msg = msg.sender + ': ' + msg.text %}
+        
+        {% if msg.category == 'alert' %}
+          <b> {{ display_msg }} </b>
+
+        {% elif msg.category == 'alert' %}
+          <i> {{ display_msg }} </i>
+
+        {% else %}
+          {{ display_msg }}
+
+        {% endif %}
+      </li>
+
+    {% endfor %}
+
+  </ul>
+
+  <input type="text" id="msg">
+  <button id="send-btn" class="btn btn-outline-dark" type="submit">Send</button>
+
+</div>
+
+
+<script type="text/javascript"> 
+  $(document).ready(function() {
+
+    var socket = io.connect('http://127.0.0.1:5000');
+    const sender = "{{ sesion.get('username', 'Guest') }}";
+    
+    socket.on('connect', function() {
+      socket.send({
+        'text': 'User has connected!',
+        'category': 'alert',
+        'sender': 'System'
+      });
+    });
+
+    socket.on('message', function(msg) {
+      $('#messages').append('<li class="list-group-item">'+msg+'</li>')
+    });
+
+    $('#send-btn').on('click', function() {
+      socket.send({
+        'text': $('#msg').val(),
+        'cateogry': 'plain',
+        'sender': sender
+      });
+      $('#msg').val('');
+    });
+
+  });
+
+</script>
+
 
 
 {% endblock %}
