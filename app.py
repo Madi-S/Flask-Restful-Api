@@ -1,3 +1,5 @@
+import socketio
+
 from flask import Flask
 from flask_admin import Admin
 from flask_bcrypt import Bcrypt
@@ -18,6 +20,9 @@ from config import Configuration
 app = Flask(__name__)
 app.config.from_object(Configuration)
 logger.debug('Flask app instantiated %s', app)
+
+
+sio = socketio.Server()
 
 api = Api(app)
 db = SQLAlchemy(app)
