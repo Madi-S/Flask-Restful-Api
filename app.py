@@ -1,5 +1,3 @@
-import socketio
-
 from flask import Flask
 from flask_admin import Admin
 from flask_bcrypt import Bcrypt
@@ -9,6 +7,7 @@ from flask_analytics import Analytics
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api, Resource
 from flask_googlemaps import GoogleMaps
+from flask_socketio import SocketIO, send
 
 
 from rq import Queue
@@ -22,13 +21,13 @@ app.config.from_object(Configuration)
 logger.debug('Flask app instantiated %s', app)
 
 
-sio = socketio.Server()
 
 api = Api(app)
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
 cache = Cache(app)
+sio = SocketIO(app, cors_allowed_origins='*')
 admin = Admin(app, 'Restful', template_mode='bootstrap3')
 
 Analytics(app)
