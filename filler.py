@@ -38,12 +38,12 @@ def fill_fake(n, func):
 
 
 def fill_api_user(n):
-    for i in range(100):
+    for i in range(n):
         password = '12345'  # f.password()
         username = f.unique.user_name()
         APIUser.create(username, password)
         logger.debug('API User #%s created %s:%s', i+1, password, username)
-    logger.debug('%s API Users created', 100)
+    logger.debug('%s API Users created', n)
 
 
 if __name__ == '__main__':
