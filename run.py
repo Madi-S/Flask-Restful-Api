@@ -20,7 +20,8 @@ if __name__ == '__main__':
 
     logger.debug('RESOURCES ADDED -> APP IS RUNNING')
     
-    app.run()
+    # app.run()
+    sio.run(app)
 
     # Don't forget to run redis worker:
     # rq worker --with-scheduler
