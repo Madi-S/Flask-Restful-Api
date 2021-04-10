@@ -5,25 +5,31 @@ from app import db, app, logger, bcrypt
 
 
 
-# class FlushAPICallsJob(db.Model):
-#     job_id = db.Column(db.String(36), primary_key=True)
-#     api_user_key = db.Column(db.Integer, db.ForeignKey('api_user.api_user_key'))
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(230), nullable=False)
+    sender = db.Column(db.String(100), nullable=False)
+    category = db.Column(db.String(50), nullable=False)
 
-#     def __repr__(self):
-#         return f'<FlushAPICallsTask obj #{self.job_id}: API User Key: {self.api_user_key}>'
+    def __repr__(self):
+        return f'<Message obj #{self.id}: Text: {self.text}, Sender: {self.sender}, Category: {self.category}>'
 
-#     def delete(self):
-#         db.session.delete(self)
-#         db.session.commit()
-#         return True
+    @staticmethod
+    def create(text, sender, category):
+        return Message(
+            text=text,
+            sender=sender,
+            category=category,
+        )
 
-#     @staticmethod
-#     def create(id, api_key):
-#         print('!!!', id)
-#         j = FlushAPICallsJob(job_id=id, api_user_key=api_key)
-#         db.session.add(j)
-#         db.session.commit()
-#         return j
+    @staticmethod
+    def get_last_n_msgs(n=50):
+        return Message.query.filter_by().limit(n).all()
+
+    @staticmethod
+    def get_msgs_containing(text, n=100):
+        search = f'%{text}%'
+        return Message.query.filter(Message.text.like(search)).limit(n).all()
 
 
 class APIUser(db.Model):    
