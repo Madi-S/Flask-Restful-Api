@@ -190,15 +190,15 @@ def message_handler(msg):
     logger.debug('Message: %s', msg)
     
     
-    if msg.text in bad_words or len(msg.text) < 2 or len(msg.text) > 229:
+    if msg['text'] in bad_words or len(msg['text']) < 2 or len(msg['text']) > 229:
         flash('Message contains bad words or message length is inappropriate')
         return redirect(url_for('index'))
 
     else:
         Message.create(
-            text=msg.text, 
-            sender=msg.sender,
-            category=msg.category
+            text=msg['text'], 
+            sender=msg['sender'],
+            category=msg['category']
         )
 
         send(msg, broadcast=True)
