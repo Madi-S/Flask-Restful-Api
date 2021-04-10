@@ -1,6 +1,6 @@
 import rq
 from uuid import uuid4
-from datetime import timedelta
+from datetime import timedelta, datetime
 from app import db, app, logger, bcrypt
 
 
@@ -10,21 +10,25 @@ class Message(db.Model):
     text = db.Column(db.String(230), nullable=False)
     sender = db.Column(db.String(100), nullable=False)
     category = db.Column(db.String(50), nullable=False)
+    # date = db.Column(db.DateTime, default=datetime.now)
 
     def __repr__(self):
         return f'<Message obj #{self.id}: Text: {self.text}, Sender: {self.sender}, Category: {self.category}>'
 
     @staticmethod
     def create(text, sender, category):
-        return Message(
+        msg =  Message(
             text=text,
             sender=sender,
             category=category,
         )
+        db.session.add(msg)
+        db.session.commit()
+        return msg
 
     @staticmethod
     def get_last_n_msgs(n=50):
-        return Message.query.filter_by().limit(n).all()
+        return Message.query.order_by(Message.id.desc()).limit(n).all()[::-1]
 
     @staticmethod
     def get_msgs_containing(text, n=100):
