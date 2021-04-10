@@ -1,10 +1,10 @@
-from jobs import *
-from app import app, admin, logger, api
+# from jobs import *
+from app import app, logger, sio, send, admin, db, api
 from flask_admin.contrib.sqla import ModelView
 from flask import render_template, redirect, jsonify, url_for, request, session, flash, send_from_directory
 
 from functools import wraps
-from models import APIUser, APIKey, db
+from models import APIUser, APIKey, Message
 from forms import LoginForm, RegistrationForm
 
 import os
@@ -156,27 +156,54 @@ def profile(username):
 
 @app.route('/search', methods=['POST'])
 def search():
+    # return jsonify(({'object': 'result1'}, {'object': 'result2'}, {'object': 'result3'}, {'object': 'result3'}, {'object': 'result4'}))
+    
     text = request.form.get('text')
     search = f'%{text}%'
-    users = APIUser.query.filter(APIUser.username.like(search)).all()[:10]
+    users = APIUser.query.filter(APIUser.username.like(search)).limit(100).all()
     data = []
     for user in users:
-        print(user)
         data.append({
             'username': user.username
         })
     return jsonify(data)
 
-    # return jsonify(({'object': 'result1'}, {'object': 'result2'}, {'object': 'result3'}, {'object': 'result3'}, {'object': 'result4'}))
 
 
 @app.route('/')
 def index():
-    sleep_thread()
-    send_email_to()
-    return render_template('index.html')
+    # sleep_thread()
+    # send_email_to()
+    msgs = Message.get_last_n_msgs(10)
+    return render_template('index.html', msgs=msgs)
 
 
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'img/favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+
+bad_words = ('foe', 'bar')
+
+@sio.on('message')
+def message_handler(msg):
+    logger.debug('Message: %s', msg)
+    
+    
+    if msg.text in bad_words or len(msg.text) < 2 or len(msg.text) > 229:
+        flash('Message contains bad words or message length is inappropriate')
+        return redirect(url_for('index'))
+
+    else:
+        Message.create(
+            text=msg.text, 
+            sender=msg.sender,
+            category=msg.category
+        )
+
+        send(msg, broadcast=True)
+
+    # broadcast=False means sending message only to the sender (from whom message originally came from) 
+    # broadcast=True means sending message to everyone
+
+
