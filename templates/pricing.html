@@ -14,13 +14,14 @@
   <a href="#" id="buy_btn" class="btn btn-dark">Buy Premium API</a>
 
 
-  <script src="https://js.strip.com/v3/"></script>
-  {# <script>
+  <script src="https://js.strip.com/v3"></script>
+  
+  <!-- <script>
     const checkout_session_id = '{{ checkout_session_id }}';
     const checkout_publick_key = '{{ checkout_publick_key }}';
   </script>
-  <script src="{{ url_for('static', filename='js/strip-no-ajax.js') }}"></script>
-  #}
+  <script src="{{ url_for('static', filename='js/strip-no-ajax.js') }}"></script> -->
+  
 
   <script src="{{ url_for('static', filename='js/strip-ajax.js') }}"></script>
 {% endblock %}
