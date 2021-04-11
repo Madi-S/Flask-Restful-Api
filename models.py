@@ -39,8 +39,8 @@ class Message(db.Model):
 class APIUser(db.Model):    
     id = db.Column(db.Integer, primary_key=True)
     api_calls = db.Column(db.Integer, default=0, nullable=False) 
-    api_calls_limit = db.Column(db.Integer, default=5, nullable=False)
-    api_call_interval = db.Column(db.Interval, nullable=False, default=timedelta(seconds=10))
+    api_calls_limit = db.Column(db.Integer, default=100, nullable=False)
+    api_call_interval = db.Column(db.Interval, nullable=False, default=timedelta(hours=24))
     
     api_user_key = db.Column(db.String(200), db.ForeignKey('api_key.key'), nullable=False)
 
