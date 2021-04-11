@@ -10,72 +10,23 @@
 
 {% block content %}
 
-<h2>Chat</h2>
-
-
-<div class="card">
-  <ul id="messages" class="list-group list-group-flush">
-    <li class="list-group-item"><b>Be nice in chat! (Do not say 'foe' or 'bar')</b></li>
-
-    {% for msg in msgs %}
-
-      <li class="list-group-item">
-        {% set display_msg = msg.sender + ': ' + msg.text %}
-        
-        {% if msg.category == 'alert' %}
-          <b> {{ display_msg }} </b>
-
-        {% elif msg.category == 'alert' %}
-          <i> {{ display_msg }} </i>
-
-        {% else %}
-          {{ display_msg }}
-
-        {% endif %}
-      </li>
-
-    {% endfor %}
-
-  </ul>
-
-  <input type="text" id="msg">
-  <button id="send-btn" class="btn btn-outline-dark" type="submit">Send</button>
-
+<div class="container">
+  <p>
+    Eazy API suggests free data on fake users and fake locations. However, our company does not grant boundless access to our servers. Users can have only 100 request per 24 hours. 
+  </p>
+  <p>
+    Luckily, we grant limitless acccess to our API for users with Premius subscription.
+  </p>
+  <p>
+    Premium subscription and pricing can be found on 'Pricing' tab above.
+  </p>
 </div>
+<br>
 
 
-<script type="text/javascript"> 
-  $(document).ready(function() {
-
-    var socket = io.connect('http://127.0.0.1:5000');
-    var sender = "{{ session.get('username', 'Guest') }}";
-    
-    socket.on('connect', function() {
-      socket.send({
-        'text': 'User has connected!',
-        'category': 'alert',
-        'sender': 'System'
-      });
-    });
-
-    socket.on('message', function(msg) {
-      $('#messages').append('<li class="list-group-item">'+msg.sender + ': ' +msg.text+'</li>')
-    });
-
-    $('#send-btn').on('click', function() {
-      console.log(sender);
-      socket.send({
-        'text': $('#msg').val(),
-        'category': 'plain',
-        'sender': sender
-      });
-      $('#msg').val('');
-    });
-
-  });
-
-</script>
-
-
+<figure class="figure">
+  <img src="{{ url_for('static', filename='img/example.svg') }}" class="figure-img img-fluid rounded" alt="Hopefully, no one will reveal that I am into elephants">
+  <figcaption class="figure-caption">Yes, this is a cool picture</figcaption>
+</figure>
 
 {% endblock %}
