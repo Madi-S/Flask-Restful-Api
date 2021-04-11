@@ -174,13 +174,23 @@ def search():
 def index():
     # sleep_thread()
     # send_email_to()
-    msgs = Message.get_last_n_msgs(10)
-    return render_template('index.html', msgs=msgs)
+    return render_template('index.html')
 
 
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'img/favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+
+@app.route('/chat')
+def chat():
+    msgs = Message.get_last_n_msgs(20)
+    return render_template('chat.html', msgs=msgs)
+
+
+@sio.on('disconnect')
+def test_disconnect():
+    logger.debug('Client disconnected')
 
 
 bad_words = ('foe', 'bar')
