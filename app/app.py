@@ -6,7 +6,6 @@ from flask_migrate import Migrate
 from flask_analytics import Analytics
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api, Resource
-from flask_googlemaps import GoogleMaps
 from flask_socketio import SocketIO, send
 
 

@@ -9,7 +9,7 @@ class Configuration:
 
     if platform.startswith('w'):
         # For Windows
-        SQLALCHEMY_DATABASE_URI = r'sqlite:///C:\Users\khova\Desktop\Python\Code\Flask-Restful-Api\restful.db'
+        SQLALCHEMY_DATABASE_URI = r'sqlite:///C:\Users\khova\Desktop\Python\Code\Flask-Restful-Api\app\restful.db'
     else:
         SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/retful.db'                  # 'mysql+mysqlconnector://root:1234@localhost/restful'
 
