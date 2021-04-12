@@ -9,12 +9,14 @@ rq worker --with-scheduler
 
 ## Run Web App:
 
-### Option 1 (simple)
+
+####Option 1 (simple)
 ```bash
 python run.py
 ```
 
-### Option 2 (uWSGI)
+
+####Option 2 (uWSGI)
 
 ```bash
 uwsgi app.ini
