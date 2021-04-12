@@ -1,5 +1,5 @@
 # Flask-Restful-Api
-Tutorial for building RESTFul API with Flask
+Sample application dedicated to building RESTFul API with Flask
 
 ## Run Redis Queue:
 
