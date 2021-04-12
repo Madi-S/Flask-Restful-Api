@@ -1,11 +1,13 @@
 # Flask-Restful-Api
 Tutorial for building RESTFul API with Flask
 
-## Run
+## Run Redis Queue:
 
 ```bash
 rq worker --with-scheduler
 ```
+
+## Run Web App:
 
 ### Option 1 (simple)
 ```bash
